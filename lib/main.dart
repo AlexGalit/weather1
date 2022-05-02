@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:flutter/src/painting/_network_image_io.dart';
 
 
-void main() => runApp(WeatherApp());
+
+void main() => runApp(const WeatherApp());
 
 
 class WeatherApp extends StatefulWidget {
@@ -23,11 +25,15 @@ class _WeatherAppState extends State<WeatherApp> {
   String location = 'San Francisco';
   String abrev = '';
   String errorMessage = '';
-  List<int> maxTemperatureForecast = [];
-  List<int> minTemperatureForecast = [];
-  List<int> abrevForecast = [];
+  List maxTemperatureForecast = [0];
+  List minTemperatureForecast = [0];
+  List abrevForecast = [0];
 
+  String maxTemperature = '';
+ String minTemperature = '';
+ //dynamic abrevForecast = [1];
 
+@override
   initState(){
     super.initState();
     fetchLocation();
@@ -36,7 +42,7 @@ class _WeatherAppState extends State<WeatherApp> {
 
    void fetchSearch( String input) async {
     try {
-      print('start fetch');
+      //print('start fetch');
       final searchResult = await http.get(Uri.parse(
           'https://api.openweathermap.org/data/2.5/weather?q=' + input +
               '&appid=8ca060fa79da0dbfafb1d6080ceb51df'));
@@ -47,7 +53,7 @@ class _WeatherAppState extends State<WeatherApp> {
       setState(() {
         location = result["name"];
         temperature = (result["main"]["temp"] - 273.17).round();
-        print('setState by fetch');
+        //print('setState by fetch');
         weat = result["weather"][0]["main"].replaceAll(' ', '').toLowerCase();
         abrev = result["weather"][0]["icon"].toString();
         errorMessage = '';
@@ -67,7 +73,7 @@ class _WeatherAppState extends State<WeatherApp> {
       //id = result["sys"]["id"];
       location = result["name"];
       temperature = (result["main"]["temp"]-273.17).round();
-      print('setState by fetch');
+      //print('setState by fetch');
       weat = result["weather"][0]["main"].replaceAll(' ','').toLowerCase();
       abrev = result["weather"][0]["icon"];
     });
@@ -77,26 +83,28 @@ class _WeatherAppState extends State<WeatherApp> {
   }
   void fetchLocationDay() async {
 
-  var today = new DateTime.now();
+  var today = DateTime.now();
+
   for (var i=0; i<7; i++){
-   final locationDayResult = await http.get(Uri.parse ('https://api.openweathermap.org/data/2.5/weather?q=san francisco&appid=8ca060fa79da0dbfafb1d6080ceb51df'
-       + new DateFormat('y/M/d').format.toString()+today.add(new Duration(days: i+1)).toString()));
+   final locationDayResult = await http.get(Uri.parse ('https://api.openweathermap.org/data/2.5/weather?q=san francisco&appid=8ca060fa79da0dbfafb1d6080ceb51df'.toString()
+       + DateFormat('y/M/d').format.toString()+today.add(Duration(days: i+1)).toString()));
    var result = json.decode(locationDayResult.body);
-   abrev = result["weather"]["icon"];
-   // minTemperature = result["list"]["temp_min"];
-   // maxTemperature = result["list"]["temp_max"];
+   print('result $result');
+   //abrev = result["weather"][0]["icon"].toString();
+   //minTemperature =((result["main"]["temp_min"]-273.17).round());
+   //maxTemperature =((result["main"]["temp_max"]-273.17).round());
 
    setState(() {
 
-     minTemperatureForecast[i] = (result["weather"]["main"]["temp_min"]-273.17).round();
-     maxTemperatureForecast[i] = (result["weather"]["main"]["temp_max"]-273.17).round();
-     abrevForecast[i] = result["weather"]["icon"];
+     minTemperatureForecast[i]=((result["main"]["temp_min"]-273.17).round());
+     maxTemperatureForecast[i]=((result["main"]["temp_max"]-273.17).round());
+     abrevForecast[i]=(result["weather"][0]["icon"]);
+     minTemperature =((result["main"]["temp_min"]-273.17).round());
+     maxTemperature =((result["main"]["temp_max"]-273.17).round());
    });
   }
 
-
   }
-
 
     void onTextFieldSubmited(String input)  {
           fetchSearch(input);
@@ -136,32 +144,38 @@ class _WeatherAppState extends State<WeatherApp> {
                       Center(
                       child: Text(
                           temperature.toString() + ' °C',
-                              style: TextStyle(color: Colors.white, fontSize: 60.0),
+                              style: const TextStyle(color: Colors.white, fontSize: 60.0),
                       ),
                     ),
                     Center(
                       child: Text(
                         location,
-                        style: TextStyle(color: Colors.white, fontSize: 40),
+                        style: const TextStyle(color: Colors.white, fontSize: 40),
                       ),
                     ),
-                    Row(
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+
+                    child: Row(
 
                       children:<Widget>[
-                       forecastElement(1, abrevForecast[0]), //minTemperatureForecast[0], maxTemperatureForecast[0]),
+                       forecastElement(1, abrevForecast[0], minTemperature[0], maxTemperature[0]),
+                        forecastElement(2, abrev, minTemperature, maxTemperature),
+                        forecastElement(3, abrev, minTemperature, maxTemperature),
                        //forecastElement(2, abrevForecast[1], minTemperatureForecast[1], maxTemperatureForecast[1]),
                         ]
                     ),
+                    ),
                     Column(
                       children: <Widget>[
-                        Container(
+                        SizedBox(
                             width: 300,
                             child: TextField(
                               onSubmitted: (String input){
                                 onTextFieldSubmited(input);
                               },
-                                style: TextStyle(color: Colors.white, fontSize: 25.0),
-                                decoration: InputDecoration(
+                                style: const TextStyle(color: Colors.white, fontSize: 25.0),
+                                decoration: const InputDecoration(
                                   hintText: 'Пошук міста...',
                                   hintStyle: TextStyle(color: Colors.white, fontSize: 18),
                                   prefixIcon: Icon(Icons.search,
@@ -172,7 +186,7 @@ class _WeatherAppState extends State<WeatherApp> {
                         Text(
                           errorMessage,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.redAccent, fontSize: 20.0),
                         )
                       ],
@@ -185,45 +199,48 @@ class _WeatherAppState extends State<WeatherApp> {
     );
   }
 }
-Widget forecastElement(daysFromNow, abrev){ //minTemperature, maxTemperature){
-  var now = new DateTime.now();
-  var oneDayFromNow = now.add(new Duration(days: daysFromNow));
+Widget forecastElement(daysFromNow, abrev, minTemperature, maxTemperature){
+  dynamic now = DateTime.now();
+  dynamic oneDayFromNow = now.add(Duration(days: daysFromNow));
 
-  return Container(
-    decoration: BoxDecoration(
-      color: Color.fromRGBO(205, 212, 228, 0.2),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Column(
-      children: [
-        Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  children: <Widget>[
-                    Text(new DateFormat.E().format(oneDayFromNow),
-                    style: TextStyle(color: Colors.white, fontSize: 25),
-                    ),
-                    Text(
-                        new DateFormat.MMMd().format(oneDayFromNow),
-                        style: TextStyle(color: Colors.white, fontSize: 20)),
-                    Image.network('http://openweathermap.org/img/wn/' +
-                        abrev + '.png', width: 20),
-                   // Text('hight:' + maxTemperature.toString() + ' °C',
-                 // style: TextStyle(color: Colors.white, fontSize: 30.0)),
-                 //   Text('low:' + minTemperature.toString() + ' °C',
-                //  style: TextStyle(color: Colors.white, fontSize: 30.0),
-                 // ),
-  ],
+  return Padding(
+    padding: const EdgeInsets.only(left: 16.0),
+    child: Container(
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(205, 212, 228, 0.2),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      Text(DateFormat.E().format(oneDayFromNow),
+                      style: const TextStyle(color: Colors.white, fontSize: 25),
+                      ),
+                      Text(
+                          DateFormat.MMMd().format(oneDayFromNow),
+                          style: const TextStyle(color: Colors.white, fontSize: 20)),
+                      Image.network('http://openweathermap.org/img/wn/' +
+                          abrev.toString() + '.png', width: 20),
+                      Text('hight:' + maxTemperature.toString() + ' °C',
+                    style: const TextStyle(color: Colors.white, fontSize: 30.0)),
+                      Text('low:' + minTemperature.toString() + ' °C',
+                    style: const TextStyle(color: Colors.white, fontSize: 30.0),
+                   // ),
+                      )],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     ),
   );
 }
