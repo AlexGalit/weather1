@@ -25,12 +25,12 @@ class _WeatherAppState extends State<WeatherApp> {
   String location = 'San Francisco';
   String abrev = '';
   String errorMessage = '';
-  List maxTemperatureForecast = [0];
-  List minTemperatureForecast = [0];
-  List abrevForecast = [0];
+  List<int> maxTemperatureForecast = [0,0,0,0,0,0,0];
+  List<int> minTemperatureForecast = [0,0,0,0,0,0,0];
+  List<int> abrevForecast = [0,0,0,0,0,0,0];
 
-  String maxTemperature = '';
- String minTemperature = '';
+  //String maxTemperature = '';
+ //String minTemperature = '';
  //dynamic abrevForecast = [1];
 
 @override
@@ -86,7 +86,7 @@ class _WeatherAppState extends State<WeatherApp> {
   var today = DateTime.now();
 
   for (var i=0; i<7; i++){
-   final locationDayResult = await http.get(Uri.parse ('https://api.openweathermap.org/data/2.5/weather?q=san francisco&appid=8ca060fa79da0dbfafb1d6080ceb51df'.toString()
+   final locationDayResult = await http.get(Uri.parse ('https://api.openweathermap.org/data/2.5/weather?q=san francisco&appid=8ca060fa79da0dbfafb1d6080ceb51df'
        + DateFormat('y/M/d').format.toString()+today.add(Duration(days: i+1)).toString()));
    var result = json.decode(locationDayResult.body);
    print('result $result');
@@ -96,11 +96,12 @@ class _WeatherAppState extends State<WeatherApp> {
 
    setState(() {
 
-     minTemperatureForecast[i]=((result["main"]["temp_min"]-273.17).round());
-     maxTemperatureForecast[i]=((result["main"]["temp_max"]-273.17).round());
-     abrevForecast[i]=(result["weather"][0]["icon"]);
-     minTemperature =((result["main"]["temp_min"]-273.17).round());
-     maxTemperature =((result["main"]["temp_max"]-273.17).round());
+     minTemperatureForecast.add((result["main"]["temp_min"]-273.17).round());
+     maxTemperatureForecast.add((result["main"]["temp_max"]-273.17).round());
+     abrevForecast.add(result["weather"][0]["icon"]);
+    // abrevForecast = (result["weather"][0]["icon"]);
+     //minTemperature =((result["main"]["temp_min"]-273.17).round());
+     //maxTemperature =((result["main"]["temp_max"]-273.17).round());
    });
   }
 
@@ -159,9 +160,9 @@ class _WeatherAppState extends State<WeatherApp> {
                     child: Row(
 
                       children:<Widget>[
-                       forecastElement(1, abrevForecast[0], minTemperature[0], maxTemperature[0]),
-                        forecastElement(2, abrev, minTemperature, maxTemperature),
-                        forecastElement(3, abrev, minTemperature, maxTemperature),
+                       forecastElement(1, abrevForecast[0], minTemperatureForecast[0], maxTemperatureForecast[0]),
+                        //forecastElement(2, abrev, minTemperature, maxTemperature),
+                        //forecastElement(3, abrev, minTemperature, maxTemperature),
                        //forecastElement(2, abrevForecast[1], minTemperatureForecast[1], maxTemperatureForecast[1]),
                         ]
                     ),
